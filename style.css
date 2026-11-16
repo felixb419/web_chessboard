@@ -1,0 +1,74 @@
+:root {
+  --square-size: 100px;
+  --color-light: #f0d9b5;
+  --color-dark: #b58863;
+}
+
+.board {
+  user-select: none;
+  display: grid;
+  grid-template-columns: repeat(8, var(--square-size));
+  grid-template-rows: repeat(8, var(--square-size));
+  width: calc(8 * var(--square-size));
+}
+
+.square {
+  width: var(--square-size);
+  height: var(--square-size);
+}
+
+.light {
+  background: var(--color-light);
+}
+
+.dark {
+  background: var(--color-dark);
+}
+
+.square {
+  width: var(--square-size);
+  height: var(--square-size);
+  position: relative; /* important */
+}
+
+.square.mv-marked::after {
+  content: "";
+  width: 25%;
+  height: 25%;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.piece {
+  user-select: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.drag-piece {
+  z-index: 1000;
+
+  width: var(--square-size);
+  height: var(--square-size);
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.drag-piece img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}

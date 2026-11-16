@@ -1,0 +1,128 @@
+"use strict";
+class Board {
+    div;
+    squares;
+    pieces;
+    constructor() {
+        // init div and squares
+        this.div = document.getElementById("board");
+        this.squares = [];
+        for (let row = 0; row < 8; row++) {
+            const rowArr = [];
+            for (let col = 0; col < 8; col++) {
+                const square = document.createElement("div");
+                square.className = "square " + ((row + col) % 2 ? "dark" : "light");
+                // append square to board
+                this.div.appendChild(square);
+                // append reference to square in squares
+                rowArr.push(square);
+            }
+            this.squares.push(rowArr);
+        }
+        // init pieces
+        const startPosition = [
+            ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"],
+            ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
+            ["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
+        ];
+        this.pieces = structuredClone(startPosition);
+    }
+    setPiece(pos, piece) {
+        board.pieces[pos.row][pos.col] = piece;
+    }
+    getPiece(pos) {
+        return board.pieces[pos.row][pos.col];
+    }
+    render(pos) {
+        const piece = board.getPiece(pos);
+        const square = board.squares[pos.row][pos.col];
+        if (piece === "") {
+            square.innerHTML = "";
+        }
+        else {
+            const img = document.createElement("img");
+            img.src = `assets/${piece}.svg`;
+            img.classList.add("piece");
+            square.replaceChildren(img);
+        }
+    }
+    renderAll() {
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                this.render({ row: row, col: col });
+            }
+        }
+    }
+}
+const board = new Board();
+class HeldPiece {
+    piece;
+    div;
+    origin;
+    constructor() {
+        this.piece = "";
+        this.div = document.getElementById("dragged_piece");
+        this.origin = { row: 0, col: 0 };
+    }
+    moveToPointer(event) {
+        held.div.style.left = `${event.clientX}px`;
+        held.div.style.top = `${event.clientY}px`;
+    }
+}
+const held = new HeldPiece();
+// util functions
+function getCoords(event) {
+    const squareSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--square-size"));
+    return {
+        row: Math.floor(event.clientY / squareSize),
+        col: Math.floor(event.clientX / squareSize),
+    };
+}
+function inBoard(pos) {
+    return pos.row >= 0 && pos.row <= 7 && pos.col >= 0 && pos.col <= 7;
+}
+// attach listeners
+board.div.addEventListener("pointerdown", (event) => {
+    let pos = getCoords(event);
+    if (board.getPiece(pos) === "") {
+        return;
+    }
+    held.piece = board.getPiece(pos);
+    held.origin.row = pos.row;
+    held.origin.col = pos.col;
+    board.setPiece(pos, "");
+    board.render(pos);
+    held.div.style.display = "block";
+    const img = document.createElement("img");
+    img.src = `assets/${held.piece}.svg`;
+    held.div.replaceChildren(img);
+    held.moveToPointer(event);
+});
+board.div.addEventListener("pointermove", (event) => {
+    if (held.piece === "")
+        return;
+    held.moveToPointer(event);
+});
+document.addEventListener("pointerup", (event) => {
+    let pos = getCoords(event);
+    if (held.piece === "") {
+        return;
+    }
+    if (!inBoard(pos)) {
+        board.setPiece(held.origin, held.piece);
+        board.render(held.origin);
+    }
+    else {
+        board.setPiece(pos, held.piece);
+        board.render(pos);
+    }
+    held.piece = "";
+    held.div.style.display = "none";
+});
+// render all pieces at the start
+board.renderAll();
